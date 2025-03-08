@@ -1,0 +1,6 @@
+@RxBlockChain_HostAddress = http://localhost:5135
+
+GET {{RxBlockChain_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
