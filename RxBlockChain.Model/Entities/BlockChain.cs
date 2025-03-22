@@ -9,8 +9,11 @@ namespace RxBlockChain.Model.Entities
 {
     public class BlockChain
     {
-            private readonly List<Block> _chain = new List<Block>();
+        private readonly List<Block> _chain;
 
+        public BlockChain() {
+            _chain = new List<Block>();
+        }
             public void AddBlock(Block newBlock)
             {
                 if (_chain.Count > 0)

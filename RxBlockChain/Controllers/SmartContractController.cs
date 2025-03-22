@@ -36,7 +36,7 @@ public class SmartContractController : ControllerBase
                 return Unauthorized(ReturnedResponse<SmartContract>.ErrorResponse("User address is required in headers.", null));
 
             var response = await _smartContractService.Deploy(contract, userAddress);
-            return response.code == "200" ? Ok(response) : BadRequest(response);
+            return response.code == 200 ? Ok(response) : BadRequest(response);
         }
         catch (Exception ex)
         {
@@ -63,7 +63,7 @@ public class SmartContractController : ControllerBase
                 return Unauthorized(ReturnedResponse<object>.ErrorResponse("User address is required in headers.", null));
 
             var response = await _smartContractService.Execute(request.ContractAddress, request.Function, request.Args, userAddress);
-            return response.code == "200" ? Ok(response) : BadRequest(response);
+            return response.code == 200 ? Ok(response) : BadRequest(response);
         }
         catch (Exception ex)
         {

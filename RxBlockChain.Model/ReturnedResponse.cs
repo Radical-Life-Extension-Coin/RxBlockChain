@@ -9,7 +9,7 @@ namespace RxBlockChain.Model
             var apiResp = new ApiResponse();
             apiResp.data = data;
             apiResp.Message = Status.Unsuccessful.ToString();
-            apiResp.code = "400";
+            apiResp.code = 400;
             var error = new ApiError();
             error.Message = message;
             apiResp.error = error;
@@ -23,7 +23,7 @@ namespace RxBlockChain.Model
             apiResp.data = data;
             apiResp.referenceId = ReferenceId;
             apiResp.Message = Status.Successful.ToString();
-            apiResp.code = "200";
+            apiResp.code = 200;
             var error = new ApiError();
             error.Message = message;
             apiResp.error = error;
@@ -39,7 +39,7 @@ namespace RxBlockChain.Model
             var apiResp = new ApiResponse<T>();
             apiResp.data = data;
             apiResp.Message = Status.Unsuccessful.ToString();
-            apiResp.code = "400";
+            apiResp.code = 400;
             var error = new ApiError();
             error.Message = message;
             apiResp.error = error;
@@ -53,7 +53,7 @@ namespace RxBlockChain.Model
             apiResp.data = data;
             apiResp.referenceId = ReferenceId;
             apiResp.Message = Status.Successful.ToString();
-            apiResp.code = "200";
+            apiResp.code = 200;
             var error = new ApiError();
             error.Message = message;
             apiResp.error = error;

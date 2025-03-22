@@ -3,6 +3,7 @@ using RxBlockChain.Core.Interface.iRepositories;
 using RxBlockChain.Core.Interface.iServices;
 using RxBlockChain.Model;
 using RxBlockChain.Model.Entities;
+using RxBlockChain.Model.Enums;
 
 namespace RxBlockChain.Core.Services
 {
@@ -24,7 +25,7 @@ namespace RxBlockChain.Core.Services
         {
             try
             {
-                var user = await _unitOfWork.User.GetFirstOrDefaultAsync(u => u.Address == userAddress);
+                var user = await _unitOfWork.Users.GetFirstOrDefaultAsync(u => u.Address == userAddress);
                 if (user == null || user.Balance < TransactionFee)
                     return ReturnedResponse<SmartContract>.ErrorResponse("Insufficient balance for deployment fee.", null);
 
@@ -37,11 +38,11 @@ namespace RxBlockChain.Core.Services
                     ToAddress = contract.ContractAddress,
                     Amount = TransactionFee,
                     TimeStamp = DateTime.UtcNow,
-                    Type = "Deployment",
+                    Type =TransactionType.ContractTransaction,
                     ContractAddress = contract.ContractAddress
                 });
 
-                 _unitOfWork.User.Update(user);
+                 _unitOfWork.Users.Update(user);
                 contract.State = new Dictionary<string, object>(); // Initialize contract state
                 await _unitOfWork.SmartContracts.AddAsync(contract);
                 await _unitOfWork.CompleteAsync();
@@ -61,7 +62,7 @@ namespace RxBlockChain.Core.Services
         {
             try
             {
-                var user = await _unitOfWork.User.GetFirstOrDefaultAsync(u => u.Address == userAddress);
+                var user = await _unitOfWork.Users.GetFirstOrDefaultAsync(u => u.Address == userAddress);
                 if (user == null || user.Balance < TransactionFee)
                     return ReturnedResponse<object>.ErrorResponse("Insufficient balance for execution fee.", null);
 
@@ -74,11 +75,11 @@ namespace RxBlockChain.Core.Services
                     ToAddress = contractAddress,
                     Amount = TransactionFee,
                     TimeStamp = DateTime.UtcNow,
-                    Type = "Execution",
+                    Type = TransactionType.ContractTransaction,
                     ContractAddress = contractAddress
                 });
 
-                 _unitOfWork.User.Update(user);
+                 _unitOfWork.Users.Update(user);
 
                 var contract = await _unitOfWork.SmartContracts.GetFirstOrDefaultAsync(c => c.ContractAddress == contractAddress);
                 if (contract == null)

@@ -1,12 +1,12 @@
 ﻿
+using RxBlockChain.Model.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace RxBlockChain.Model.Entities
 {
-    public class Transactions
+    public class Transactions : BaseEntity
     {
-        public Guid Id { get; set; }
 
         [Required]
         public string TransactionHash { get; set; } = string.Empty;
@@ -21,19 +21,14 @@ namespace RxBlockChain.Model.Entities
 
         public string Signature { get; set; } = string.Empty;
         public string ContractAddress { get; set; } = string.Empty;
-        public string Type { get; set; } = string.Empty;
+        public TransactionType Type { get; set; }
 
         public decimal Fee { get; set; } 
 
         public DateTime TimeStamp { get; set; } = DateTime.UtcNow;
 
-        public Guid? BlockId { get; set; }
+        public Guid BlockId { get; set; }
 
-        [JsonIgnore]
-        public Block Block { get; set; } 
-
-       
-       
     }
 }
 

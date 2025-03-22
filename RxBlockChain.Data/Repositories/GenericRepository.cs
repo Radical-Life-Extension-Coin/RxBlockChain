@@ -39,6 +39,7 @@ namespace RxBlockChain.Data.Repositories
             return await _context.Set<T>().FirstOrDefaultAsync(expression);
         }
 
+       
         public async Task<IEnumerable<T>> GetAllAsync( )
         {
             return await _context.Set<T>().ToListAsync();
@@ -64,5 +65,7 @@ namespace RxBlockChain.Data.Repositories
         {
             return await _context.Set<T>().FirstOrDefaultAsync(predicate);
         }
+
+       
     }
 }

@@ -1,4 +1,5 @@
 ﻿using NBitcoin;
+using Newtonsoft.Json;
 using RxBlockChain.Core.DTO;
 using RxBlockChain.Core.Interface.iRepositories;
 using RxBlockChain.Core.Interface.iServices;
@@ -19,56 +20,6 @@ namespace RxBlockChain.Core.Services
         }
 
 
-        //public async Task<ApiResponse<Transactions>> CreateTransactionAsync(TransactionDTO transactionDto)
-        //{
-        //    string transactionHash = Guid.NewGuid().ToString();
-
-
-        //    decimal fee = transactionDto.Amount * 0.01m;
-
-        //    var senderWallet = await _unitOfWork.Wallets.GetFirstOrDefaultAsync(w => w.Address == transactionDto.FromAddress);
-        //    if (senderWallet == null)
-        //    {
-        //        return ReturnedResponse<Transactions>.ErrorResponse("Sender wallet not found.", null);
-        //    }
-
-        //    var recipientWallet = await _unitOfWork.Wallets.GetFirstOrDefaultAsync(w => w.Address == transactionDto.ToAddress);
-        //    if (recipientWallet == null)
-        //    {
-        //        return ReturnedResponse<Transactions>.ErrorResponse("Recipient wallet not found.", null);
-        //    }
-
-        //    if (senderWallet.Balance < (transactionDto.Amount + fee))
-        //    {
-        //        return ReturnedResponse<Transactions>.ErrorResponse("Insufficient funds.", null);
-        //    }
-
-        //    senderWallet.Balance -= (transactionDto.Amount + fee);
-        //    recipientWallet.Balance += transactionDto.Amount;
-
-        //    var messageToSign = transactionHash;
-        //    byte[] signedTransaction = SignMessageWithPrivateKey(senderWallet.Mnemonic, messageToSign);
-
-        //    var transaction = new Transactions
-        //    {
-        //        Id = Guid.NewGuid(),
-        //        TransactionHash = transactionHash,
-        //        Amount = transactionDto.Amount,
-        //        Fee = fee,
-        //        FromAddress = transactionDto.FromAddress,
-        //        ToAddress = transactionDto.ToAddress,
-        //        TimeStamp = DateTime.UtcNow,
-        //        BlockId = null,
-        //        Block = null,
-        //        Signature = Convert.ToBase64String(signedTransaction)
-        //    };
-
-        //    await _unitOfWork.Transactions.AddAsync(transaction);
-        //    await _unitOfWork.CompleteAsync();
-
-        //    return ReturnedResponse<Transactions>.SuccessResponse("Transaction created successfully.", transaction);
-        //  }
-
         public async Task<ApiResponse<Transactions>> CreateTransactionAsync(TransactionDTO transactionDto)
         {
             string transactionHash = Guid.NewGuid().ToString();
@@ -80,64 +31,70 @@ namespace RxBlockChain.Core.Services
 
             var recipientWallet = await _unitOfWork.Wallets.GetFirstOrDefaultAsync(w => w.Address == transactionDto.ToAddress);
             if (recipientWallet == null)
-                return ReturnedResponse<Transactions>.ErrorResponse("Recipient wallet not found.", null);
+                return ReturnedResponse<Transactions>.ErrorResponse("Recipient wallet address not found.", null);
 
             if (senderWallet.Balance < (transactionDto.Amount + fee))
                 return ReturnedResponse<Transactions>.ErrorResponse("Insufficient funds.", null);
 
-            if (string.IsNullOrWhiteSpace(senderWallet.Mnemonic) || !IsValidMnemonic(senderWallet.Mnemonic))
-                return ReturnedResponse<Transactions>.ErrorResponse("Invalid mnemonic for sender wallet.", null);
+            if (string.IsNullOrWhiteSpace(transactionDto.Mnemonic) || transactionDto.Mnemonic == "")
+                return ReturnedResponse<Transactions>.ErrorResponse("Mnemonic for sender wallet not found.", null);
 
-            senderWallet.Balance -= (transactionDto.Amount + fee);
-            recipientWallet.Balance += transactionDto.Amount;
-
-            byte[] signedTransaction;
-            try
-            {
-                signedTransaction = SignMessageWithPrivateKey(senderWallet.Mnemonic, transactionHash);
-            }
-            catch (Exception ex)
-            {
-                return ReturnedResponse<Transactions>.ErrorResponse("Transaction signing failed: " + ex.Message, null);
-            }
+            
 
             var transaction = new Transactions
             {
-                Id = Guid.NewGuid(),
                 TransactionHash = transactionHash,
                 Amount = transactionDto.Amount,
                 Fee = fee,
                 FromAddress = transactionDto.FromAddress,
                 ToAddress = transactionDto.ToAddress,
                 TimeStamp = DateTime.UtcNow,
-                BlockId = null,
-                Block = null,
-                Signature = Convert.ToBase64String(signedTransaction)
+                Signature = ""
             };
 
+            try
+            {
+                transaction.Signature = SignTransactionToBase64(transactionDto.Mnemonic, transaction);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Inner Exception: " + ex.InnerException?.Message);
+                return ReturnedResponse<Transactions>.ErrorResponse("Transaction signing failed: " + ex.Message, null);
+            }
+
+
+            senderWallet.Balance -= (transactionDto.Amount + fee);
+
+            
             await _unitOfWork.Transactions.AddAsync(transaction);
             await _unitOfWork.CompleteAsync();
 
             return ReturnedResponse<Transactions>.SuccessResponse("Transaction created successfully.", transaction);
         }
 
-        public byte[] SignMessageWithPrivateKey(string mnemonic, string message)
+       
+        public string SignTransactionToBase64(string mnemonic, Transactions transaction)
         {
-            if (string.IsNullOrWhiteSpace(mnemonic) || string.IsNullOrWhiteSpace(message))
-                throw new ArgumentException("Mnemonic and message must not be empty.");
+            if (string.IsNullOrWhiteSpace(mnemonic))  throw new ArgumentException("Mnemonic must not be empty.", nameof(mnemonic));
 
             try
             {
-                var ecdsa = GetPrivateKeyFromECDsa(mnemonic);
-                byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-                return ecdsa.SignData(messageBytes, HashAlgorithmName.SHA256);
+                string serializedTransaction = JsonConvert.SerializeObject(transaction);
+                byte[] transactionBytes = Encoding.UTF8.GetBytes(serializedTransaction);
+
+                using (var ecdsa = GetPrivateKeyFromECDsa(mnemonic))
+                {
+                    byte[] signature = ecdsa.SignData(transactionBytes, HashAlgorithmName.SHA256);
+                    return Convert.ToBase64String(signature);
+                }
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException("Failed to sign the message with the private key.", ex);
+                throw new InvalidOperationException("Failed to sign the transaction.", ex);
             }
         }
 
+        
 
         private bool IsValidMnemonic(string mnemonic)
         {
@@ -160,6 +117,7 @@ namespace RxBlockChain.Core.Services
                 var privateKey = extKey.PrivateKey;
 
                 byte[] privateKeyBytes = privateKey.ToBytes();
+                byte[] derEncodedKey = EncodeECPrivateKey(rawKeyBytes);
 
                 using (ECDsa ecdsa = ECDsa.Create())
                 {
@@ -205,6 +163,20 @@ namespace RxBlockChain.Core.Services
         {
             var transactions = await _unitOfWork.Transactions.FindAsync(
                 t => t.FromAddress == walletAddress || t.ToAddress == walletAddress);
+
+            if (transactions == null || !transactions.Any())
+            {
+                return ReturnedResponse<IEnumerable<Transactions>>.ErrorResponse("No transactions found for this wallet.", null);
+            }
+
+            return ReturnedResponse<IEnumerable<Transactions>>.SuccessResponse("Transactions retrieved successfully.", transactions);
+        }
+
+
+        public async Task<ApiResponse<IEnumerable<Transactions>>> GetPendingTransactions()
+        {
+            var transactions = await _unitOfWork.Transactions.FindAsync(
+                t => t.BlockId == Guid.Empty);
 
             if (transactions == null || !transactions.Any())
             {

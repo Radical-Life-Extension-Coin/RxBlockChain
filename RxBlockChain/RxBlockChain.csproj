@@ -7,12 +7,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\RxBlockChain.Core\RxBlockChain.Core.csproj" />
+    <ProjectReference Include="..\RxBlockChain.Data\RxBlockChain.Data.csproj" />
     <ProjectReference Include="..\RxBlockChain.Model\RxBlockChain.Model.csproj" />
+    <ProjectReference Include="..\RxBlockChain.Utility\RxBlockChain.Utility.csproj" />
   </ItemGroup>
 
 </Project>

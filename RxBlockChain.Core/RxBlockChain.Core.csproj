@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RxBlockChain.Model\RxBlockChain.Model.csproj" />
+    <ProjectReference Include="..\RxBlockChain.Utility\RxBlockChain.Utility.csproj" />
   </ItemGroup>
 
 </Project>

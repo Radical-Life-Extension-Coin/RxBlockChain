@@ -2,21 +2,19 @@
 
 namespace RxBlockChain.Model.Entities
 {
-    public class Block
+    public class Block : BaseEntity
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
         public int BlockHeight { get; set; }
-        public string BlockHash { get; set; } = string.Empty;
-        public DateTime TimeStamp { get; set; } = DateTime.UtcNow;
         public string PreviousHash { get; set; } = string.Empty;
+        public string BlockHash { get; set; } = string.Empty;
+        public string Data { get; set; } = string.Empty;
+        public DateTime TimeStamp { get; set; } = DateTime.UtcNow;      
         public int Nonce { get; set; } 
         public List<Transactions> Transactions { get; set; } = new List<Transactions>();
-            
-        [NotMapped]
-        public object MerkleRoot { get; set; }
-        public List<SmartContract> SmartContracts { get; set; }
-        [NotMapped]
-        public object Validator { get; set; }
+        public string MerkleRoot { get; set; } = string.Empty;
+        public string ValidatorAddress { get; set; } = string.Empty;
+        public int Version { get; set; } = 1;
     }
+
 
 }

@@ -1,3 +1,8 @@
+using RxBlockChain.Data.Database;
+using Microsoft.EntityFrameworkCore;
+using RxBlockChain.Data;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,6 +11,9 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddDbContext<BlockChainDb>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDependencies(builder.Configuration);
 
 var app = builder.Build();
 

@@ -1,15 +1,11 @@
 ﻿namespace RxBlockChain.Model.Entities
 {
-    public class Wallet
+    public class Wallet : BaseEntity
     {
-        public Guid Id { get; set; }
-        public string Address { get; set; }
+        public string Address { get; set; } = string.Empty;
         public decimal Balance { get; set; }
-        public bool IsValidator => Balance >= 10000000;
-        public bool IsGenesis { get; set; }
-
-        public string Mnemonic { get; set; }
-
-        public string PrivateKey { get; internal set; }
+        public bool IsValidator { get; set; } = false;
+        public bool IsGenesis { get; set; } = false;
+        public string PrivateKey { get; set; } = string.Empty;
     }
 }

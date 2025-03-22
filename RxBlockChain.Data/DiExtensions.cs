@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using RxBlockChain.Data.Database;
 using RxBlockChain.Core.Interface.iRepositories;
 using RxBlockChain.Core.Interface.iServices;
@@ -28,7 +27,7 @@ namespace RxBlockChain.Data
             services.AddScoped<IBlockService, BlockService>();
             services.AddScoped<ISmartContractService, SmartContractService>();
             services.AddScoped<INodeService, NodeService>();
-
+            services.AddScoped<IValidatorStakingService, ValidatorStakingService>();
 
 
 

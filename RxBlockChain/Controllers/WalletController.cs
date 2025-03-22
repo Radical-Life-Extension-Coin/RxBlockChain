@@ -22,32 +22,32 @@ namespace RxBlockChain.Controllers
         public async Task<IActionResult> CreateWallet()
         {
             var response = await _walletService.CreateWalletAsync();
-            return response.code == "200" ? Ok(response) : BadRequest(response);
+            return response.code == 200 ? Ok(response) : BadRequest(response);
         }
 
-        [HttpGet("{address}")]
-        public async Task<IActionResult> GetWalletByAddress(string address)
+        [HttpGet()]
+        public async Task<IActionResult> GetWalletByAddress(string walletAddress)
         {
-            if (string.IsNullOrEmpty(address))
+            if (string.IsNullOrEmpty(walletAddress))
             {
                 return BadRequest("Wallet address is required.");
             }
 
-            var response = await _walletService.GetWalletByAddressAsync(address);
-            return response.code == "200" ? Ok(response) : NotFound(response);
+            var response = await _walletService.GetWalletByAddressAsync(walletAddress);
+            return response.code == 200 ? Ok(response) : NotFound(response);
         }
 
        
         [HttpPost("retrieveWalletByPhrase")]
-        public async Task<IActionResult> GetWalletByMnemonic([FromBody] string mnemonic)
+        public async Task<IActionResult> GetWalletByMnemonic([FromBody] string mnemonicPhrase)
         {
-            if (string.IsNullOrEmpty(mnemonic))
+            if (string.IsNullOrEmpty(mnemonicPhrase))
             {
                 return BadRequest("Mnemonic is required.");
             }
 
-            var response = await _walletService.GetWalletByMnemonicAsync(mnemonic);
-            return response.code == "200" ? Ok(response) : NotFound(response);
+            var response = await _walletService.GetWalletByMnemonicAsync(mnemonicPhrase);
+            return response.code == 200 ? Ok(response) : NotFound(response);
         }
 
 
@@ -55,7 +55,7 @@ namespace RxBlockChain.Controllers
         public async Task<IActionResult> GetOrCreateGenesisWallet()
         {
             var response = await _walletService.GetOrCreateGenesisWalletAsync();
-            return response.code == "200" ? Ok(response) : BadRequest(response);
+            return response.code == 200 ? Ok(response) : BadRequest(response);
         }
     }
 }

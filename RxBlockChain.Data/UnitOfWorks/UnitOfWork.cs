@@ -14,8 +14,8 @@ namespace RxBlockChain.Data.UnitOfWorks
         private IGenericRepository<SmartContract> _smartContracts;
         private IGenericRepository<Node> _nodes;
         private IGenericRepository<User> _user;
-        //private IGenericRepository<PosConsensus> _posConsensus;
-       // private IGenericRepository<WalletKeyId> _walletKeyIds;
+        private IGenericRepository<Validators> _validator;
+
 
         public UnitOfWork(BlockChainDb context)
         {
@@ -27,14 +27,16 @@ namespace RxBlockChain.Data.UnitOfWorks
         public IGenericRepository<Block> Blocks => _blocks ??= new GenericRepository<Block>(_context);
         public IGenericRepository<SmartContract> SmartContracts => _smartContracts ??= new GenericRepository<SmartContract>(_context);
         public IGenericRepository<Node> Nodes => _nodes ??= new GenericRepository<Node>(_context);
-        public IGenericRepository<User> User => _user ??= new GenericRepository<User>(_context);
-       // public IGenericRepository<PosConsensus> PosConsensus => _posConsensus ??= new GenericRepository<PosConsensus>(_context);
-        //public IGenericRepository<WalletKeyId> WalletKeyIds => _walletKeyIds ??= new GenericRepository<WalletKeyId>(_context);
+        public IGenericRepository<User> Users => _user ??= new GenericRepository<User>(_context);
+        public IGenericRepository<Validators> Validators => _validator ??= new GenericRepository<Validators>(_context);
+
 
         public async Task<int> CompleteAsync()
         {
             return await _context.SaveChangesAsync();
         }
+
+        
 
         public void Dispose()
         {

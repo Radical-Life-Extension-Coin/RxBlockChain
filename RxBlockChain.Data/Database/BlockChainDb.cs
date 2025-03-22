@@ -13,34 +13,35 @@ namespace RxBlockChain.Data.Database
         public DbSet<Transactions> Transactions { get; set; }
         public DbSet<Block> Blocks { get; set; }
         public DbSet<User> User { get; set; }
-
+        public DbSet<Validators> Validators { get; set; }
         public DbSet<Node>  Nodes { get; set; }
         //public DbSet<PosConsensus> PosConsensus { get; set; }
        // public DbSet<WalletKeyId> WalletKeyIds { get; set; }
         public DbSet<SmartContract> smartContracts { get; set; }
 
 
-        //protected override void OnModelCreating(ModelBuilder modelBuilder)
-        //{
-        //    // Explicitly specify the SQL column type for decimals to avoid truncation issues.
-        //    modelBuilder.Entity<Transactions>()
-        //        .Property(t => t.Amount)
-        //        .HasColumnType("decimal(18,2)");
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Explicitly specify the SQL column type for decimals to avoid truncation issues.
+            modelBuilder.Entity<Transactions>()
+                .Property(t => t.Amount)
+                .HasColumnType("decimal(18,2)");
 
-        //    modelBuilder.Entity<Transactions>()
-        //        .Property(t => t.Fee)
-        //        .HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<Transactions>()
+                .Property(t => t.Fee)
+                .HasColumnType("decimal(18,2)");
 
-        //    modelBuilder.Entity<Wallet>()
-        //        .Property(w => w.Balance)
-        //        .HasColumnType("decimal(18,2)");
-        //    base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Wallet>()
+                .Property(w => w.Balance)
+                .HasColumnType("decimal(18,2)");
+            base.OnModelCreating(modelBuilder);
 
-    
-        //    modelBuilder.Entity<SmartContract>()
-        //        .Ignore(sc => sc.State);
+            modelBuilder.Entity<Validators>().HasIndex(v => v.WalletAddress).IsUnique();
 
-        //}
+            modelBuilder.Entity<SmartContract>()
+                .Ignore(sc => sc.State);
+
+        }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
@@ -55,7 +56,7 @@ namespace RxBlockChain.Data.Database
                         item.Entity.IsDeleted = true;
                         break;
                     case EntityState.Added:
-                        item.Entity.Id = Guid.NewGuid().ToString();
+                        item.Entity.Id = Guid.NewGuid();
                         item.Entity.CreatedAt = DateTime.UtcNow;
                         break;
                     default:

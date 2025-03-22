@@ -11,7 +11,8 @@ namespace RxBlockChain.Core.Interface.iRepositories
         IGenericRepository<Block> Blocks { get; }
         IGenericRepository<SmartContract> SmartContracts { get; }
         IGenericRepository<Node> Nodes { get; }
-        IGenericRepository<User> User { get; }
+        IGenericRepository<User> Users { get; }
+        IGenericRepository<Validators> Validators { get; }
         Task<int> CompleteAsync();
     }
 }

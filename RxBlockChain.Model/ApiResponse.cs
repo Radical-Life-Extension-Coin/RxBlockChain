@@ -6,7 +6,7 @@
 
         public string referenceId { get; set; }
 
-        public string code { get; set; }
+        public int code { get; set; }
 
         public string Message { get; set; }
 

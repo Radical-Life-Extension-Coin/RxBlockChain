@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RxBlockChain.Core.Interface.iServices;
 using RxBlockChain.Model.Entities;
+using System.Collections.Generic;
 
 namespace RxBlockChain.Controllers
 {
@@ -19,14 +20,13 @@ namespace RxBlockChain.Controllers
         /// Creates a new block.
         /// </summary>
         [HttpPost("create")]
-        public async Task<IActionResult> CreateBlock([FromBody] Block block)
+        public async Task<IActionResult> CreateBlock()
         {
-            if (block == null)
-                return BadRequest("Invalid block data.");
+            
 
             try
             {
-                var createdBlock = await _blockService.CreateBlockAsync(block);
+                var createdBlock = await _blockService.CreateBlockAsync();
                 return Ok(createdBlock);
             }
             catch (Exception ex)

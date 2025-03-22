@@ -7,13 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RxBlockChain", "RxBlockChai
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RxBlockChain.Model", "..\RxBlockChain.Model\RxBlockChain.Model.csproj", "{3DE7ED4A-F3E7-427D-9F0D-0B8FDB7C635F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RxBlockChain.Core", "..\RxBlockChain.Core\RxBlockChain.Core.csproj", "{01692916-CF44-4D8A-A820-155A65C2F5E6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RxBlockChain.Core", "..\RxBlockChain.Core\RxBlockChain.Core.csproj", "{01692916-CF44-4D8A-A820-155A65C2F5E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RxBlockChain.Data", "..\RxBlockChain.Data\RxBlockChain.Data.csproj", "{EF761B74-891E-4D41-89C5-A1D23151488D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RxBlockChain.Data", "..\RxBlockChain.Data\RxBlockChain.Data.csproj", "{EF761B74-891E-4D41-89C5-A1D23151488D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RxBlockChain.Utility", "..\RxBlockChain.Utility\RxBlockChain.Utility.csproj", "{FA7CFE52-B41A-47A2-A993-3D961221321F}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RxBlockChain.Common", "..\RxBlockChain.Common\RxBlockChain.Common.csproj", "{3D73DCB8-6F56-4DF3-A358-F598C6204925}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RxBlockChain.Utility", "..\RxBlockChain.Utility\RxBlockChain.Utility.csproj", "{FA7CFE52-B41A-47A2-A993-3D961221321F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,10 +39,6 @@ Global
 		{FA7CFE52-B41A-47A2-A993-3D961221321F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FA7CFE52-B41A-47A2-A993-3D961221321F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FA7CFE52-B41A-47A2-A993-3D961221321F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3D73DCB8-6F56-4DF3-A358-F598C6204925}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3D73DCB8-6F56-4DF3-A358-F598C6204925}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3D73DCB8-6F56-4DF3-A358-F598C6204925}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3D73DCB8-6F56-4DF3-A358-F598C6204925}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

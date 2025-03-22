@@ -28,7 +28,7 @@ namespace RxBlockChain.Controllers
             }
 
             var response = await _transactionService.CreateTransactionAsync(transaction);
-            return response.code == "200" ? Ok(response) : BadRequest(response);
+            return response.code == 200 ? Ok(response) : BadRequest(response);
         }
 
         [HttpGet("all")]
