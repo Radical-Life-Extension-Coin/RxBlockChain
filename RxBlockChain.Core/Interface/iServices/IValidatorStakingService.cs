@@ -1,5 +1,4 @@
-﻿using RxBlockChain.Model.Entities;
-using RxBlockChain.Model;
+﻿using RxBlockChain.Model;
 using RxBlockChain.Core.DTO;
 
 namespace RxBlockChain.Core.Interface.iServices

@@ -3,19 +3,13 @@ using RxBlockChain.Core.Interface.iRepositories;
 using RxBlockChain.Core.Interface.iServices;
 using RxBlockChain.Model.Entities;
 using RxBlockChain.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.ComponentModel.DataAnnotations;
 
 namespace RxBlockChain.Core.Services
 {
     public class ValidatorStakingService : IValidatorStakingService
     {
-        private const decimal MIN_STAKE = 10m;
-        private const int UNSTAKE_COOLDOWN = 2; 
+        private const decimal _mIN_STAKE = 10m;
+        private const int _uNSTAKE_COOLDOWN = 2; 
         private readonly IUnitOfWork _unitOfWork;
 
         public ValidatorStakingService(IUnitOfWork unitOfWork)
@@ -25,7 +19,7 @@ namespace RxBlockChain.Core.Services
 
         public async Task<ApiResponse<ValidatorDTO>> StakeAsync(string walletAddress, decimal amount)
         {
-            if (amount < MIN_STAKE)
+            if (amount < _mIN_STAKE)
             return ReturnedResponse<ValidatorDTO>.ErrorResponse("Minimum stake is 10 tokens.", null);
 
             var response = await _unitOfWork.Validators.FindSingleAsync(v => v.WalletAddress == walletAddress);
@@ -67,11 +61,11 @@ namespace RxBlockChain.Core.Services
 
             ValidatorDTO validatorDTO = new()
             {
-                Message = $"Unstaking requested. You can withdraw in {UNSTAKE_COOLDOWN} days.",
+                Message = $"Unstaking requested. You can withdraw in {_uNSTAKE_COOLDOWN} days.",
                 WalletAddress = validator.WalletAddress
             };
 
-            return ReturnedResponse<ValidatorDTO>.SuccessResponse($"Unstaking requested. You can withdraw in {UNSTAKE_COOLDOWN} days.", validatorDTO);
+            return ReturnedResponse<ValidatorDTO>.SuccessResponse($"Unstaking requested. You can withdraw in {_uNSTAKE_COOLDOWN} days.", validatorDTO);
 
         }
 
@@ -83,7 +77,7 @@ namespace RxBlockChain.Core.Services
             if (validator == null || validator.UnstakeRequestedAt == null)
             return ReturnedResponse<ValidatorDTO>.ErrorResponse("No unstaking request found.", null);
 
-            if ((DateTime.UtcNow - validator.UnstakeRequestedAt.Value).TotalDays < UNSTAKE_COOLDOWN)
+            if ((DateTime.UtcNow - validator.UnstakeRequestedAt.Value).TotalDays < _uNSTAKE_COOLDOWN)
             return ReturnedResponse<ValidatorDTO>.ErrorResponse("Unstaking cooldown not yet complete.", null);
 
             decimal unstakedAmount = validator.StakeAmount;

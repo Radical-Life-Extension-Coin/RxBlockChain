@@ -15,8 +15,7 @@ namespace RxBlockChain.Core.Services
             try
             {
                 // Validate contract state
-                if (contract.State == null)
-                    contract.State = new Dictionary<string, object>();
+                contract.State ??= [];
 
                 object result;
                 switch (function.ToLower())
