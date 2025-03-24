@@ -1,19 +1,25 @@
-﻿using System.Security.Cryptography;
+﻿using Microsoft.Extensions.Options;
+using RxBlockChain.Common.Helper.Interface;
+using RxBlockChain.Model;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace RxBlockChain.Common.Helper
 {
-    public static class AesEncryptionHelper
+    public class AesEncryptionHelper  : IAesEncryptionHelper
     {
-        //To be improved soon, will use IOptions to retrieve env variables
-        private static readonly string _encryptionKey = Environment.GetEnvironmentVariable("AES_ENCRYPTION_KEY");
-
-        public static string Encrypt(string plainText)
+        private readonly AppSettings _settings;
+        public AesEncryptionHelper( IOptions<AppSettings> settings)
         {
-            if (string.IsNullOrEmpty(_encryptionKey))
+            _settings = settings.Value;
+        }
+
+        public string Encrypt(string plainText)
+        {
+            if (string.IsNullOrEmpty(_settings.AesEncryptionKey))
                 throw new InvalidOperationException("Encryption key not set.");
 
-            byte[] keyBytes = Encoding.UTF8.GetBytes(_encryptionKey);
+            byte[] keyBytes = Encoding.UTF8.GetBytes(_settings.AesEncryptionKey);
             byte[] iv = new byte[16];
 
             using Aes aes = Aes.Create();
@@ -32,12 +38,12 @@ namespace RxBlockChain.Common.Helper
             return Convert.ToBase64String(ms.ToArray());
         }
 
-        public static string Decrypt(string encryptedText)
+        public string Decrypt(string encryptedText)
         {
-            if (string.IsNullOrEmpty(_encryptionKey))
+            if (string.IsNullOrEmpty(_settings.AesEncryptionKey))
                 throw new InvalidOperationException("Encryption key not set.");
 
-            byte[] keyBytes = Encoding.UTF8.GetBytes(_encryptionKey);
+            byte[] keyBytes = Encoding.UTF8.GetBytes(_settings.AesEncryptionKey);
             byte[] iv = new byte[16];
 
             using Aes aes = Aes.Create();

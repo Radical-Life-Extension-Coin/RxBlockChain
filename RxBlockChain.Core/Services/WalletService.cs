@@ -1,5 +1,6 @@
 ﻿using NBitcoin;
 using RxBlockChain.Common.Helper;
+using RxBlockChain.Common.Helper.Interface;
 using RxBlockChain.Core.DTO;
 using RxBlockChain.Core.Interface.iRepositories;
 using RxBlockChain.Core.Interface.iServices;
@@ -12,11 +13,13 @@ namespace RxBlockChain.Core.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidatorStakingService _validatorService;
+        private readonly IAesEncryptionHelper _aesEncryptionHelper;
 
-        public WalletService(IUnitOfWork unitOfWork, IValidatorStakingService validatorService)
+        public WalletService(IUnitOfWork unitOfWork, IValidatorStakingService validatorService, IAesEncryptionHelper aesEncryptionHelper)
         {
             _unitOfWork = unitOfWork;
             _validatorService = validatorService;
+            _aesEncryptionHelper = aesEncryptionHelper;
         }
 
         public async Task<ApiResponse<WalletResponseDTO>> CreateWalletAsync()
@@ -35,7 +38,7 @@ namespace RxBlockChain.Core.Services
 
                 // Derive private key from mnemonic
                 string privateKey = GetPrivateKeyFromMnemonic(mnemonicWords);
-                string encryptedPrivateKey = AesEncryptionHelper.Encrypt(privateKey);
+                string encryptedPrivateKey = _aesEncryptionHelper.Encrypt(privateKey);
 
                 // Generate wallet address
                 string walletAddress = GenerateWalletAddress(mnemonicWords);
@@ -77,7 +80,7 @@ namespace RxBlockChain.Core.Services
                 {
                     return ReturnedResponse<Wallet>.ErrorResponse("Wallet not found", null);
                 }
-                wallet.PrivateKey = AesEncryptionHelper.Decrypt(wallet.PrivateKey);
+                wallet.PrivateKey = _aesEncryptionHelper.Decrypt(wallet.PrivateKey);
                 return ReturnedResponse<Wallet>.SuccessResponse("Wallet retrieved successfully", wallet);
             }
             catch (Exception)
@@ -98,7 +101,7 @@ namespace RxBlockChain.Core.Services
                 {
                     return ReturnedResponse<Wallet>.ErrorResponse("Wallet not found", null);
                 }
-                wallet.PrivateKey = AesEncryptionHelper.Decrypt(wallet.PrivateKey);
+                wallet.PrivateKey = _aesEncryptionHelper.Decrypt(wallet.PrivateKey);
                 return ReturnedResponse<Wallet>.SuccessResponse("Wallet retrieved successfully", wallet);
             }
             catch (Exception)
@@ -122,7 +125,7 @@ namespace RxBlockChain.Core.Services
                 string walletAddress = GenerateWalletAddress(mnemonicWords);
                
                 string privateKey = GetPrivateKeyFromMnemonic(mnemonicWords);
-                string encryptedPrivateKey = AesEncryptionHelper.Encrypt(privateKey);
+                string encryptedPrivateKey = _aesEncryptionHelper.Encrypt(privateKey);
 
                 var genesisWallet = new Wallet
                 {

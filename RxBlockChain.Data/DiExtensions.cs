@@ -7,6 +7,8 @@ using RxBlockChain.Core.Interface.iServices;
 using RxBlockChain.Core.Services;
 using RxBlockChain.Data.Repositories;
 using RxBlockChain.Data.UnitOfWorks;
+using RxBlockChain.Common.Helper.Interface;
+using RxBlockChain.Common.Helper;
 
 namespace RxBlockChain.Data
 {
@@ -28,6 +30,7 @@ namespace RxBlockChain.Data
             services.AddScoped<ISmartContractService, SmartContractService>();
             services.AddScoped<INodeService, NodeService>();
             services.AddScoped<IValidatorStakingService, ValidatorStakingService>();
+            services.AddScoped<IAesEncryptionHelper, AesEncryptionHelper>();
 
 
 
