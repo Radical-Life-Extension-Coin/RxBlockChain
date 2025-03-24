@@ -2,7 +2,6 @@
 
 using Microsoft.AspNetCore.Mvc;
 using RxBlockChain.Core.Interface.iServices;
-using RxBlockChain.Core.DTO;
 
 namespace RxBlockChain.Controllers
 {

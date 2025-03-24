@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RxBlockChain.Core.Interface.iServices;
-using RxBlockChain.Model.Entities;
-using System.Collections.Generic;
 
 namespace RxBlockChain.Controllers
 {
