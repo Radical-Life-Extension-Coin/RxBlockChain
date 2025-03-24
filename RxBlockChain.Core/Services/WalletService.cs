@@ -1,5 +1,4 @@
 ﻿using NBitcoin;
-using RxBlockChain.Common.Helper;
 using RxBlockChain.Common.Helper.Interface;
 using RxBlockChain.Core.DTO;
 using RxBlockChain.Core.Interface.iRepositories;
@@ -38,6 +37,7 @@ namespace RxBlockChain.Core.Services
 
                 // Derive private key from mnemonic
                 string privateKey = GetPrivateKeyFromMnemonic(mnemonicWords);
+
                 string encryptedPrivateKey = _aesEncryptionHelper.Encrypt(privateKey);
 
                 // Generate wallet address

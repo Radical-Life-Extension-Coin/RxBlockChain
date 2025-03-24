@@ -1,5 +1,9 @@
 ﻿using NBitcoin;
 using Newtonsoft.Json;
+using Org.BouncyCastle.Asn1.Sec;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Crypto.Signers;
+using Org.BouncyCastle.Math;
 using RxBlockChain.Core.DTO;
 using RxBlockChain.Core.Interface.iRepositories;
 using RxBlockChain.Core.Interface.iServices;
@@ -72,19 +76,53 @@ namespace RxBlockChain.Core.Services
             return ReturnedResponse<Transactions>.SuccessResponse("Transaction created successfully.", transaction);
         }
 
-       
-        public string SignTransactionToBase64(string mnemonic, Transactions transaction)
+
+        //public string SignTransactionToBase64(string mnemonic, Transactions transaction)
+        //{
+        //    if (string.IsNullOrWhiteSpace(mnemonic))  throw new ArgumentException("Mnemonic must not be empty.", nameof(mnemonic));
+
+        //    try
+        //    {
+        //        string serializedTransaction = JsonConvert.SerializeObject(transaction);
+        //        byte[] transactionBytes = Encoding.UTF8.GetBytes(serializedTransaction);
+
+        //        using var ecdsa = GetPrivateKeyFromECDsa(mnemonic);
+        //        byte[] signature = ecdsa.SignData(transactionBytes, HashAlgorithmName.SHA256);
+        //        return Convert.ToBase64String(signature);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new InvalidOperationException("Failed to sign the transaction.", ex);
+        //    }
+        //}
+
+        public static string SignTransactionToBase64(string mnemonic, Transactions transaction)
         {
-            if (string.IsNullOrWhiteSpace(mnemonic))  throw new ArgumentException("Mnemonic must not be empty.", nameof(mnemonic));
+            if (string.IsNullOrWhiteSpace(mnemonic))
+                throw new ArgumentException("Mnemonic must not be empty.", nameof(mnemonic));
 
             try
             {
                 string serializedTransaction = JsonConvert.SerializeObject(transaction);
                 byte[] transactionBytes = Encoding.UTF8.GetBytes(serializedTransaction);
 
-                using var ecdsa = GetPrivateKeyFromECDsa(mnemonic);
-                byte[] signature = ecdsa.SignData(transactionBytes, HashAlgorithmName.SHA256);
-                return Convert.ToBase64String(signature);
+                // Get secp256k1 private key
+                ECPrivateKeyParameters privateKey = GetSecp256k1PrivateKey(mnemonic);
+
+                // Sign the transaction
+                var signer = new ECDsaSigner();
+                signer.Init(true, privateKey);
+
+                BigInteger[] signature = signer.GenerateSignature(transactionBytes);
+                byte[] rBytes = signature[0].ToByteArray();
+                byte[] sBytes = signature[1].ToByteArray();
+
+                // Combine r and s values
+                byte[] signatureBytes = new byte[rBytes.Length + sBytes.Length];
+                Buffer.BlockCopy(rBytes, 0, signatureBytes, 0, rBytes.Length);
+                Buffer.BlockCopy(sBytes, 0, signatureBytes, rBytes.Length, sBytes.Length);
+
+                return Convert.ToBase64String(signatureBytes);
             }
             catch (Exception ex)
             {
@@ -92,7 +130,7 @@ namespace RxBlockChain.Core.Services
             }
         }
 
-        
+
 
         private static bool IsValidMnemonic(string mnemonic)
         {
@@ -103,28 +141,45 @@ namespace RxBlockChain.Core.Services
             return words.Length == 12 || words.Length == 15 || words.Length == 18 || words.Length == 21 || words.Length == 24;
         }
 
-        private static ECDsa GetPrivateKeyFromECDsa(string mnemonic)
+        //private static ECDsa GetPrivateKeyFromECDsa(string mnemonic)
+        //{
+        //    try
+        //    {
+        //        if (!IsValidMnemonic(mnemonic))
+        //            throw new ArgumentException("Invalid mnemonic. The word count must be 12, 15, 18, 21, or 24.");
+
+        //        var mnemonicObj = new Mnemonic(mnemonic, Wordlist.English);
+        //        var extKey = mnemonicObj.DeriveExtKey();
+        //        var privateKey = extKey.PrivateKey;
+
+        //        byte[] privateKeyBytes = privateKey.ToBytes();
+        //        // byte[] derEncodedKey = EncodeECPrivateKey(rawKeyBytes);
+
+        //        using ECDsa ecdsa = ECDsa.Create();
+        //        ecdsa.ImportECPrivateKey(privateKeyBytes, out _);
+        //        return ecdsa;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new InvalidOperationException("Invalid mnemonic or wordlist issue.", ex);
+        //    }
+        //}
+
+        private static ECPrivateKeyParameters GetSecp256k1PrivateKey(string mnemonic)
         {
-            try
-            {
-                if (!IsValidMnemonic(mnemonic))
-                    throw new ArgumentException("Invalid mnemonic. The word count must be 12, 15, 18, 21, or 24.");
+            if (!IsValidMnemonic(mnemonic))
+                throw new ArgumentException("Invalid mnemonic. The word count must be 12, 15, 18, 21, or 24.");
 
-                var mnemonicObj = new Mnemonic(mnemonic, Wordlist.English);
-                var extKey = mnemonicObj.DeriveExtKey();
-                var privateKey = extKey.PrivateKey;
+            var mnemonicObj = new Mnemonic(mnemonic, Wordlist.English);
+            var extKey = mnemonicObj.DeriveExtKey();
+            var privateKey = extKey.PrivateKey;
 
-                byte[] privateKeyBytes = privateKey.ToBytes();
-                // byte[] derEncodedKey = EncodeECPrivateKey(rawKeyBytes);
+            BigInteger privateKeyInt = new(1, privateKey.ToBytes());
 
-                using ECDsa ecdsa = ECDsa.Create();
-                ecdsa.ImportECPrivateKey(privateKeyBytes, out _);
-                return ecdsa;
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException("Invalid mnemonic or wordlist issue.", ex);
-            }
+            var curve = SecNamedCurves.GetByName("secp256k1");
+            var domainParams = new ECDomainParameters(curve.Curve, curve.G, curve.N, curve.H);
+
+            return new ECPrivateKeyParameters(privateKeyInt, domainParams);
         }
 
 
@@ -172,7 +227,7 @@ namespace RxBlockChain.Core.Services
         public async Task<ApiResponse<IEnumerable<Transactions>>> GetPendingTransactions()
         {
             var transactions = await _unitOfWork.Transactions.FindAsync(
-                t => t.BlockId == Guid.Empty);
+                t => t.Id == Guid.Empty);
 
             if (transactions == null || !transactions.Any())
             {

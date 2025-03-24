@@ -1,7 +1,6 @@
 ﻿
 using RxBlockChain.Model.Enums;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
 namespace RxBlockChain.Model.Entities
 {
@@ -27,7 +26,7 @@ namespace RxBlockChain.Model.Entities
 
         public DateTime TimeStamp { get; set; } = DateTime.UtcNow;
 
-        public Guid BlockId { get; set; }
+       // public Guid BlockId { get; set; }
 
     }
 }

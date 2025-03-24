@@ -34,7 +34,7 @@ namespace RxBlockChain.Core.Services
             var blocks = await _unitOfWork.Blocks.GetAllAsync();
             
             
-            if (blocks == null)
+            if (!blocks.Any())
             {
                 return ReturnedResponse<BlockDTO>.ErrorResponse("No block in blockchain.", null);
             }
@@ -76,7 +76,7 @@ namespace RxBlockChain.Core.Services
             foreach (var transaction in pendingTransactions)
             {
                 transaction.ModifiedAt = DateTime.UtcNow;
-                transaction.BlockId = newBlock.Id;
+                //transaction.BlockId = newBlock.Id;
                 fees += transaction.Fee;
             }
 

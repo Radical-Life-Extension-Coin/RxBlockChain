@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RxBlockChain.Data.Database;
 
@@ -10,9 +11,11 @@ using RxBlockChain.Data.Database;
 namespace RxBlockChain.Data.Migrations
 {
     [DbContext(typeof(BlockChainDb))]
-    partial class BlockChainDbModelSnapshot : ModelSnapshot
+    [Migration("20250324034658_RemoveBlockId")]
+    partial class RemoveBlockId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
