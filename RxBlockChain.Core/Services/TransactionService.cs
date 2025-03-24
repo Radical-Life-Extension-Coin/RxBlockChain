@@ -82,11 +82,9 @@ namespace RxBlockChain.Core.Services
                 string serializedTransaction = JsonConvert.SerializeObject(transaction);
                 byte[] transactionBytes = Encoding.UTF8.GetBytes(serializedTransaction);
 
-                using (var ecdsa = GetPrivateKeyFromECDsa(mnemonic))
-                {
-                    byte[] signature = ecdsa.SignData(transactionBytes, HashAlgorithmName.SHA256);
-                    return Convert.ToBase64String(signature);
-                }
+                using var ecdsa = GetPrivateKeyFromECDsa(mnemonic);
+                byte[] signature = ecdsa.SignData(transactionBytes, HashAlgorithmName.SHA256);
+                return Convert.ToBase64String(signature);
             }
             catch (Exception ex)
             {
@@ -96,7 +94,7 @@ namespace RxBlockChain.Core.Services
 
         
 
-        private bool IsValidMnemonic(string mnemonic)
+        private static bool IsValidMnemonic(string mnemonic)
         {
             if (string.IsNullOrWhiteSpace(mnemonic))
                 return false;
@@ -105,7 +103,7 @@ namespace RxBlockChain.Core.Services
             return words.Length == 12 || words.Length == 15 || words.Length == 18 || words.Length == 21 || words.Length == 24;
         }
 
-        private ECDsa GetPrivateKeyFromECDsa(string mnemonic)
+        private static ECDsa GetPrivateKeyFromECDsa(string mnemonic)
         {
             try
             {
@@ -117,13 +115,11 @@ namespace RxBlockChain.Core.Services
                 var privateKey = extKey.PrivateKey;
 
                 byte[] privateKeyBytes = privateKey.ToBytes();
-                byte[] derEncodedKey = EncodeECPrivateKey(rawKeyBytes);
+                // byte[] derEncodedKey = EncodeECPrivateKey(rawKeyBytes);
 
-                using (ECDsa ecdsa = ECDsa.Create())
-                {
-                    ecdsa.ImportECPrivateKey(privateKeyBytes, out _);
-                    return ecdsa;
-                }
+                using ECDsa ecdsa = ECDsa.Create();
+                ecdsa.ImportECPrivateKey(privateKeyBytes, out _);
+                return ecdsa;
             }
             catch (Exception ex)
             {

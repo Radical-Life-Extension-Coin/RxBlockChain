@@ -1,12 +1,10 @@
 ﻿using NBitcoin;
+using RxBlockChain.Common.Helper;
 using RxBlockChain.Core.DTO;
 using RxBlockChain.Core.Interface.iRepositories;
 using RxBlockChain.Core.Interface.iServices;
 using RxBlockChain.Model;
 using RxBlockChain.Model.Entities;
-using System.Security.Cryptography;
-using System.Text;
-using RxBlockChain.Utility;
 
 namespace RxBlockChain.Core.Services
 {
@@ -37,19 +35,18 @@ namespace RxBlockChain.Core.Services
 
                 // Derive private key from mnemonic
                 string privateKey = GetPrivateKeyFromMnemonic(mnemonicWords);
+                string encryptedPrivateKey = AesEncryptionHelper.Encrypt(privateKey);
 
                 // Generate wallet address
                 string walletAddress = GenerateWalletAddress(mnemonicWords);
 
-                // Create the wallet object
                 var wallet = new Wallet
                 {
                     Address = walletAddress,
                     Balance = 0m,
-                    PrivateKey = privateKey
+                    PrivateKey = encryptedPrivateKey
                 };
 
-                // Save wallet to DB
                 await _unitOfWork.Wallets.AddAsync(wallet);
                 await _unitOfWork.CompleteAsync();
 
@@ -80,6 +77,7 @@ namespace RxBlockChain.Core.Services
                 {
                     return ReturnedResponse<Wallet>.ErrorResponse("Wallet not found", null);
                 }
+                wallet.PrivateKey = AesEncryptionHelper.Decrypt(wallet.PrivateKey);
                 return ReturnedResponse<Wallet>.SuccessResponse("Wallet retrieved successfully", wallet);
             }
             catch (Exception)
@@ -100,6 +98,7 @@ namespace RxBlockChain.Core.Services
                 {
                     return ReturnedResponse<Wallet>.ErrorResponse("Wallet not found", null);
                 }
+                wallet.PrivateKey = AesEncryptionHelper.Decrypt(wallet.PrivateKey);
                 return ReturnedResponse<Wallet>.SuccessResponse("Wallet retrieved successfully", wallet);
             }
             catch (Exception)
@@ -121,9 +120,9 @@ namespace RxBlockChain.Core.Services
                 var mnemonic = new Mnemonic(Wordlist.English, WordCount.TwentyFour);
                 string mnemonicWords = mnemonic.ToString();
                 string walletAddress = GenerateWalletAddress(mnemonicWords);
-
-                ExtKey extKey = mnemonic.DeriveExtKey();
-                string privateKey = extKey.PrivateKey.ToHex();
+               
+                string privateKey = GetPrivateKeyFromMnemonic(mnemonicWords);
+                string encryptedPrivateKey = AesEncryptionHelper.Encrypt(privateKey);
 
                 var genesisWallet = new Wallet
                 {
@@ -131,19 +130,16 @@ namespace RxBlockChain.Core.Services
                     Balance = 1000000000m, // 1 billion coins
                     IsGenesis = true,
                     IsValidator = true,
-                    PrivateKey = privateKey
+                    PrivateKey = encryptedPrivateKey
                 };
 
                 await _unitOfWork.Wallets.AddAsync(genesisWallet);
-                await _unitOfWork.CompleteAsync();
 
                 decimal stakeAmount = 1000;
 
-                var response = await _validatorService.StakeAsync(walletAddress, stakeAmount);
-                
-                decimal bal = genesisWallet.Balance - stakeAmount;
-                
-                genesisWallet.Balance = bal;
+                var response = await _validatorService.StakeAsync(walletAddress, stakeAmount);                
+                                
+                genesisWallet.Balance -= stakeAmount;
 
                 await _unitOfWork.CompleteAsync();
 
@@ -156,22 +152,33 @@ namespace RxBlockChain.Core.Services
                 return ReturnedResponse<WalletDTO>.ErrorResponse($"Error retrieving or creating genesis wallet. {ex.Message}", null);
             }
         }
-
-        private string GenerateWalletAddress(string mnemonic)
-        {
-            using (var sha256 = SHA256.Create())
-            {
-                byte[] inputBytes = Encoding.UTF8.GetBytes(mnemonic);
-                byte[] hashBytes = sha256.ComputeHash(inputBytes);
-                var sb = new StringBuilder();
-                foreach (byte b in hashBytes)
-                {
-                    sb.Append(b.ToString("x2"));
-                }
-                return sb.ToString();
-            }
-        }
        
+
+        private static string GenerateWalletAddress(string mnemonicPhrase)
+        {
+            var mnemonic = new Mnemonic(mnemonicPhrase, Wordlist.English);
+            var masterKey = mnemonic.DeriveExtKey();
+            var key = masterKey.Derive(0, true);
+
+            var address = key.PrivateKey.PubKey.GetAddress(ScriptPubKeyType.Segwit, Network.Main).ToString();
+            return address;
+        }
+
+        //public async Task<decimal> GetWalletBalance(string walletAddress)
+        //{
+        //    var received = await _unitOfWork.Transactions
+        //        .GetFirstOrDefaultAsync(t => t.ToAddress == walletAddress)
+        //        .SumAsync(t => t.Amount);
+
+        //    var sent = await _unitOfWork.Transactions
+        //        .GetFirstOrDefaultAsync(t => t.FromAddress == walletAddress)
+        //        .SumAsync(t => t.Amount);
+
+        //    return received - sent;
+        //}
+
+
+
     }
 }
 
