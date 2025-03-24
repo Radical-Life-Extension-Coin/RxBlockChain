@@ -1,6 +1,7 @@
 using RxBlockChain.Data.Database;
 using Microsoft.EntityFrameworkCore;
 using RxBlockChain.Data;
+using RxBlockChain.Model;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +15,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<BlockChainDb>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddDependencies(builder.Configuration);
+builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 
 var app = builder.Build();
 
